@@ -4,11 +4,13 @@ class Torta
   attr_reader :tam #tamaño
   attr_reader :tipo_torta
   attr_reader :tiempo_coccion
+  attr_reader :coccion
 
-  def initialize(tam, tipo_torta)
+  def initialize(tipo_torta, tam)
     @tam = tam
     @tipo_torta = tipo_torta
     @tiempo_coccion = 0
+    @coccion = ""
   end#mtd initialize
 
   def to_s
@@ -17,42 +19,125 @@ class Torta
 
   def tiempo_coccion
     case @tipo_torta
-      when "Rusa"             then @tiempo_coccion = 8
-      when "Argentina"        then @tiempo_coccion = 7
-      when "Hawaiana"         then @tiempo_coccion = 4
-      when "Cubana"           then @tiempo_coccion = 3
-      when "Carne Al pastor"  then @tiempo_coccion = 5
+      when "rusa"             then @tiempo_coccion = 8
+      when "argentina"        then @tiempo_coccion = 7
+      when "hawaiana"         then @tiempo_coccion = 4
+      when "cubana"           then @tiempo_coccion = 3
+      when "milanesa"         then @tiempo_coccion = 5
       else
         "Esa torta no está en el menú"
     end
   end#mtd tiempo_coccion
 
-  def torta_coccion
+  def coccion
     tiempo_coccion
     if $tiempo_horno < @tiempo_coccion - 1
-      "Torta #{tipo_torta} cruda"
+      @coccion = "Torta #{tipo_torta} cruda"
     elsif $tiempo_horno > @tiempo_coccion
-      "Torta #{tipo_torta} se quemó"
+      @coccion = "Torta #{tipo_torta} se quemó"
     elsif $tiempo_horno == @tiempo_coccion - 1
-      "Torta #{tipo_torta} casi lista"
+      @coccion = "Torta #{tipo_torta} casi lista"
     else
-      "Torta #{tipo_torta} lista!"
+      @coccion = "Torta #{tipo_torta} lista!"
     end
   end#mtd torta_coccion
       
 
 end
 
-
 class Horno
 
-  attr_reader :temperatura
   attr_reader :capacidad
 
   def initialize
-    @temperatura = 120
-    @capacidad = 2
+    @capacidad = 0
+  end
+
+  def fill
+    @capacidad += 1
+  end
+
+  def fill?
+    if @capacidad < 1
+      false
+    else
+      true
+    end
   end
 
 end#class Horno
 
+
+class Charola
+  attr_reader :capacidad
+
+  def initialize
+    @capacidad = 0.0
+  end
+
+  def fill(tam)
+      if @capacidad < 12
+          if tam == "normal"
+            @capacidad += 2
+          elsif tam == "mitad"
+            @capacidad += 1
+          else
+            @capacidad += 3 #tam == "grande"
+          end
+      end
+  end#mtd fill
+
+  def fill?
+    if @capacidad >= 12
+      true 
+    else
+      false
+    end
+  end#mtd fill?
+
+end#class charola
+
+horno = Horno.new
+charola = Charola.new
+quemadas = []
+listas = []
+tortas = []
+menu = %w( Rusa Argentina Hawaiana Cubana Milanesa)
+lineWidth = 60
+puts "Menú del día".center lineWidth
+
+until charola.fill?
+    puts "\t*Rusa  *Argentina  *Hawaiana  *Cubana  *Milanesa"
+    tipo_torta = gets.chomp.downcase
+
+    puts "  Selecciona un tamaño"
+    puts "\t Mitad / Normal / Grande "
+    t = gets.chomp.downcase
+
+    tortas << Torta.new(tipo_torta, t)
+    charola.fill(t)
+end
+
+until horno.fill?
+  $tiempo_horno = rand(9)
+  horno.fill
+end
+
+tortas.each do |torta|
+  p torta.coccion
+end
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+        
